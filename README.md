@@ -1,15 +1,11 @@
 # Nomenclature Night — Два мира
 
-Игровой прототип v0.3 (Godot 4.5.2, GDScript). Android debug APK собирается автоматически через GitHub Actions.
+Godot 4.5.2 Android graybox v0.3. Six story stages, two heroes, third-person movement, quest markers, branching evidence choices, touch controls and local save.
 
-## Сборка APK
-Перейдите во вкладку **Actions → Android APK (debug)**. В успешном запуске откройте **Artifacts** и скачайте архив с `NomenclatureNight-debug.apk`. Пакет приложения: `org.warfwar.nomenclaturenight`, ARM64. Это тестовая подпись, не релиз Google Play.
+**APK:** Actions → Android APK (debug) → successful run → Artifacts → NomenclatureNight-v0.3-Android-arm64.
 
-## Управление
-WASD — движение, мышь — камера, E — действие, F — удар, Tab — журнал. На Android — экранные кнопки и свайп по правой части экрана.
+Package: org.warfwar.nomenclaturenight. Debug APK for manual installation, not a Play Store release.
 
-## Содержание
-6 этапов, 2 персонажа, локации внешнего мира, тюрьмы №18 и испытания, развилки в диалогах и 3 сохранения. Геометрия временная. Коммерческое использование персонажей и событий оригинального романа требует лицензии правообладателя.
+Controls: WASD to move, E to interact, F to strike, mouse to rotate view. Android: touch buttons and camera swipes on the right.
 
-## Проверка
-`python3 tests/check_project.py` и `godot --headless --editor --path . --quit`.
+The full v0.3 prototype is also distributed as a separate source archive in the conversation; this repository contains a lightweight Android vertical slice designed for CI verification. Publishing an adaptation using original novel characters and protected story elements may require licensing.
