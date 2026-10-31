@@ -1,11 +1,28 @@
-# Nomenclature Night — Два мира
+# Номенклатура ночи — Два мира (v0.4)
 
-Godot 4.5.2 Android graybox v0.3. Six story stages, two heroes, third-person movement, quest markers, branching evidence choices, touch controls and local save.
+**Полный переход с 3D на интерактивный текстовый квест.**
 
-**APK:** Actions → Android APK (debug) → successful run → Artifacts → NomenclatureNight-v0.3-Android-arm64.
+- Вертикальный экран для чтения на Android; адаптивное окно на ПК
+- Цин Чэнь и собственный путешественник
+- Два мира, обратный отсчёт, тюрьма №18
+- 39 сценарных сцен, решения с проверками характеристик
+- Наблюдательность, решимость, доверие и подозрение
+- Улики, история сцен, редактируемое имя героя, автосохранение и 3 ручных слота
+- Четыре исхода демонстрационного эпизода
+- Без интернета и сторонних ресурсов
 
-Package: org.warfwar.nomenclaturenight. Debug APK for manual installation, not a Play Store release.
+Тексты эпизода написаны специально для прототипа и **не копируют главы ранобэ**. Имена и элементы мира взяты из пользовательского концепта адаптации; публичный релиз требует соответствующих прав.
 
-Controls: WASD to move, E to interact, F to strike, mouse to rotate view. Android: touch buttons and camera swipes on the right.
+## APK
+GitHub → Actions → *Narrative Quest Android APK* → успешный запуск → Artifacts.
+APK для ARM64 и x86_64, тестовая подпись. Старую APK с другим package ID можно не удалять.
 
-The full v0.3 prototype is also distributed as a separate source archive in the conversation; this repository contains a lightweight Android vertical slice designed for CI verification. Publishing an adaptation using original novel characters and protected story elements may require licensing.
+## Редактор
+Godot 4.5.2: открыть project.godot и F6/F5. История хранится в data/story.json и не зависит от UI. Добавляйте сцены с id, title, text, choices.
+
+## Испытание
+python3 tests/check_story.py
+godot --headless --editor --path . --quit
+godot --headless --path . --quit-after 10
+
+Визуальные иллюстрации и многоголосая аудиоозвучка пока не включены.
