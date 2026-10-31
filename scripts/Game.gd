@@ -296,15 +296,17 @@ func _menu() -> void:
     if modal_visible:
         return
     _show("МЕНЮ","Локальное сохранение первого слота.",["ПРОДОЛЖИТЬ","СОХРАНИТЬ","ЗАГРУЗИТЬ","НАЧАТЬ ЗАНОВО"],func(i: int):
-        match i:
-            1: _save()
-            2: _load()
-            3:
-                stage=0
-                step=0
-                suspicion=0
-                clues.clear()
-                _make_zone())
+        if i == 1:
+            _save()
+        elif i == 2:
+            _load()
+        elif i == 3:
+            stage=0
+            step=0
+            suspicion=0
+            clues.clear()
+            _make_zone()
+    )
 func _journal() -> void:
     if modal_visible:
         return
