@@ -28,6 +28,13 @@ jobs:
           unzip -q /tmp/templates.tpz -d /tmp/templates
           cp -a /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/4.5.2.stable/"
           godot --version
+      - name: Configure Godot Android editor settings
+        run: |
+          set -e
+          sdkmanager --sdk_root="$ANDROID_HOME" "platform-tools" "build-tools;35.0.0" "platforms;android-35"
+          mkdir -p "$HOME/.config/godot"
+          printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\nexport/android/android_sdk_path = "%s"\nexport/android/java_sdk_path = "%s"\n' "$ANDROID_HOME" "$JAVA_HOME" > "$HOME/.config/godot/editor_settings-4.5.tres"
+          cat "$HOME/.config/godot/editor_settings-4.5.tres"
       - name: Set up debug keystore
         run: |
           mkdir -p "$HOME/.android"
