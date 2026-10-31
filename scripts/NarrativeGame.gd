@@ -42,7 +42,7 @@ func _ready() -> void:
     nodes = parsed.get("nodes",{})
     current = str(parsed.get("entry","prologue"))
     _build_interface()
-    _enter(current)
+    _render_scene()
     _welcome()
 func _rect_color(parent: Node, c: Color) -> ColorRect:
     var rect := ColorRect.new()
@@ -328,14 +328,9 @@ func _welcome() -> void:
     _space(wrap,22)
     _label(wrap,"Две судьбы. Один отсчёт. Решения, за которые придётся отвечать.",29,C_TEXT)
     _space(wrap,30)
-    _button(wrap,"НАЧАТЬ ИСТОРИЮ",func():
-        _reset()
-        _enter("prologue")
-        _clear_overlay(),true,84)
+    _button(wrap,"НАЧАТЬ ИСТОРИЮ",_new_game,true,84)
     if FileAccess.file_exists("user://nomenclature_0.json"):
-        _button(wrap,"ПРОДОЛЖИТЬ",func():
-            _load(0)
-            _clear_overlay(),false,78)
+        _button(wrap,"ПРОДОЛЖИТЬ",_continue_game,false,78)
     _space(wrap,30)
     _label(wrap,"Пробный эпизод: тюрьма №18, Цин Чэнь и собственный путешественник. Четыре концовки.",20,C_MUTED)
 func _show_history() -> void:
@@ -375,13 +370,7 @@ func _show_character() -> void:
     edit.custom_minimum_size.y=64
     edit.add_theme_font_size_override("font_size",27)
     wrap.add_child(edit)
-    _button(wrap,"СОХРАНИТЬ ИМЯ",func():
-        var trimmed: String=edit.text.strip_edges()
-        if not trimmed.is_empty():
-            hero_name=trimmed
-            _render_scene()
-            _autosave()
-        _clear_overlay(),true,74)
+    _button(wrap,"СОХРАНИТЬ ИМЯ",_save_name.bind(edit),true,74)
     _space(wrap,12)
     var names={"insight":"НАБЛЮДАТЕЛЬНОСТЬ","resolve":"РЕШИМОСТЬ","trust":"ДОВЕРИЕ","heat":"ПОДОЗРЕНИЕ"}
     for key in ["insight","resolve","trust","heat"]:
@@ -396,17 +385,31 @@ func _show_menu() -> void:
         var box:=HBoxContainer.new()
         wrap.add_child(box)
         var value:=slot
-        var a:=_button(box,"СОХР. %d" % slot,func():
-            _save(value)
-            _clear_overlay(),false,72)
+        var a:=_button(box,"СОХР. %d" % slot,_save_and_close.bind(value),false,72)
         a.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-        var b:=_button(box,"ЗАГР. %d" % slot,func():
-            if _load(value):
-                _clear_overlay(),false,72)
+        var b:=_button(box,"ЗАГР. %d" % slot,_load_and_close.bind(value),false,72)
         b.size_flags_horizontal=Control.SIZE_EXPAND_FILL
     _space(wrap,16)
-    _button(wrap,"НОВАЯ ИСТОРИЯ",func():
-        _reset()
-        _enter("prologue")
-        _clear_overlay(),false,72)
+    _button(wrap,"НОВАЯ ИСТОРИЯ",_new_game,false,72)
     _close_control(wrap)
+
+func _new_game() -> void:
+    _reset()
+    _enter("prologue")
+    _clear_overlay()
+func _continue_game() -> void:
+    _load(0)
+    _clear_overlay()
+func _save_name(edit: LineEdit) -> void:
+    var trimmed: String=edit.text.strip_edges()
+    if not trimmed.is_empty():
+        hero_name=trimmed
+        _render_scene()
+        _autosave()
+    _clear_overlay()
+func _save_and_close(slot: int) -> void:
+    _save(slot)
+    _clear_overlay()
+func _load_and_close(slot: int) -> void:
+    if _load(slot):
+        _clear_overlay()
