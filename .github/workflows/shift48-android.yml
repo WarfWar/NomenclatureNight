@@ -80,7 +80,7 @@ jobs:
         run: |
           godot --headless --path . --script res://tests/touch_swipe.gd > /tmp/touch.log 2>&1 || { cat /tmp/touch.log; exit 1; }
           cat /tmp/touch.log
-          grep -q 'PASS: finger gesture' /tmp/touch.log
+          grep -q 'PASS: touch handlers' /tmp/touch.log
 
       - name: Export Android APK
         run: |
