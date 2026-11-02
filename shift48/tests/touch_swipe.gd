@@ -1,5 +1,5 @@
 extends SceneTree
-## Synthetic Android-like finger gesture test (not a real hardware swipe).
+## Headless test of mobile gesture handlers using genuine InputEventScreenTouch/Drag values.
 func assert_ok(ok: bool, description: String) -> bool:
     if not ok:
         push_error("SWIPE TEST FAILED: "+description)
@@ -32,9 +32,10 @@ func _run() -> void:
     touch.pressed=true
     touch.index=0
     touch.position=center
-    Input.parse_input_event(touch)
+    # Headless SceneTree scripts do not forward synthetic device input into _input.
+    # Exercise the same ScreenTouch/ScreenDrag handler directly.
+    app._input(touch)
     await process_frame
-    print("SWIPE DEBUG rect=",rect," center=",center," index=",app.touch_index," inside=",app.pointer_in_scroll," scroll=",scroll.scroll_vertical)
     var point: Vector2=center
     for i in range(9):
         var drag:=InputEventScreenDrag.new()
@@ -42,14 +43,13 @@ func _run() -> void:
         drag.relative=Vector2(0,-26)
         point+=drag.relative
         drag.position=point
-        Input.parse_input_event(drag)
+        app._input(drag)
         await process_frame
-    print("SWIPE DEBUG counter=",app.touch_scroll_events," index=",app.touch_index," scroll=",scroll.scroll_vertical)
     var release:=InputEventScreenTouch.new()
     release.index=0
     release.pressed=false
     release.position=point
-    Input.parse_input_event(release)
+    app._input(release)
     await process_frame
     if not assert_ok(app.touch_scroll_events>0,"real touch drag events were handled"):
         return
@@ -67,5 +67,5 @@ func _run() -> void:
     await process_frame
     if not assert_ok(app.page_scroll.scroll_vertical<first_position,"arrow scroll can move up"):
         return
-    print("PASS: finger gesture, no accidental navigation, persistent scroll and fallback buttons")
+    print("PASS: touch handlers, no accidental navigation, persistent scroll and fallback buttons")
     quit(0)
