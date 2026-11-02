@@ -34,6 +34,7 @@ func _run() -> void:
     touch.position=center
     Input.parse_input_event(touch)
     await process_frame
+    print("SWIPE DEBUG rect=",rect," center=",center," index=",app.touch_index," inside=",app.pointer_in_scroll," scroll=",scroll.scroll_vertical)
     var point: Vector2=center
     for i in range(9):
         var drag:=InputEventScreenDrag.new()
@@ -43,6 +44,7 @@ func _run() -> void:
         drag.position=point
         Input.parse_input_event(drag)
         await process_frame
+    print("SWIPE DEBUG counter=",app.touch_scroll_events," index=",app.touch_index," scroll=",scroll.scroll_vertical)
     var release:=InputEventScreenTouch.new()
     release.index=0
     release.pressed=false
