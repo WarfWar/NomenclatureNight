@@ -18,6 +18,13 @@ var page_scroll: ScrollContainer
 var scroll_positions: Dictionary = {}
 var return_page: String = "home"
 var reset_overlay: ColorRect
+# Finger-drag state, independent of Godot's built-in ScrollContainer behavior.
+var touch_index: int = -1
+var touch_origin: Vector2 = Vector2.ZERO
+var touch_previous: Vector2 = Vector2.ZERO
+var gesture_was_scroll: bool = false
+var pointer_in_scroll: bool = false
+var touch_scroll_events: int = 0
 
 func _ready() -> void:
     var backdrop := ColorRect.new()
@@ -84,9 +91,57 @@ func _button(parent: Node, value: String, action: Callable, primary: bool=false,
     b.add_theme_color_override("font_disabled_color",MUTED)
     b.disabled=inactive
     b.mouse_filter=Control.MOUSE_FILTER_PASS
-    b.pressed.connect(action)
+    b.focus_mode=Control.FOCUS_NONE
+    b.pressed.connect(_button_guard.bind(action))
     parent.add_child(b)
     return b
+
+func _button_guard(action: Callable) -> void:
+    # Do not activate a card if the finger was dragging the list.
+    if gesture_was_scroll:
+        return
+    if action.is_valid():
+        action.call()
+
+func _input(event: InputEvent) -> void:
+    # Godot's native touch-to-scroll may behave differently from a desktop
+    # wheel. Route Android touchscreen drags directly into the current list.
+    if event is InputEventScreenTouch:
+        var finger: InputEventScreenTouch=event
+        if finger.pressed:
+            gesture_was_scroll=false
+            touch_index=-1
+            pointer_in_scroll=false
+            if is_instance_valid(page_scroll) and page_scroll.get_global_rect().has_point(finger.position):
+                touch_index=finger.index
+                touch_origin=finger.position
+                touch_previous=finger.position
+                pointer_in_scroll=true
+        elif finger.index==touch_index:
+            if gesture_was_scroll:
+                get_viewport().set_input_as_handled()
+            touch_index=-1
+            pointer_in_scroll=false
+    elif event is InputEventScreenDrag:
+        var drag: InputEventScreenDrag=event
+        if pointer_in_scroll and drag.index==touch_index and is_instance_valid(page_scroll):
+            var displacement: float=drag.position.y-touch_previous.y
+            if absf(drag.position.y-touch_origin.y)>9.0 or gesture_was_scroll:
+                gesture_was_scroll=true
+                var bar: VScrollBar=page_scroll.get_v_scroll_bar()
+                var limit: int=maxi(0,int(ceilf(bar.max_value-bar.page)))
+                page_scroll.scroll_vertical=clampi(page_scroll.scroll_vertical-int(round(displacement)),0,limit)
+                touch_scroll_events+=1
+                get_viewport().set_input_as_handled()
+            touch_previous=drag.position
+
+func _scroll_step(direction: int) -> void:
+    if not is_instance_valid(page_scroll):
+        return
+    var bar: VScrollBar=page_scroll.get_v_scroll_bar()
+    var limit: int=maxi(0,int(ceilf(bar.max_value-bar.page)))
+    page_scroll.scroll_vertical=clampi(page_scroll.scroll_vertical+direction*int(page_scroll.size.y*0.60),0,limit)
+    scroll_positions[page]=page_scroll.scroll_vertical
 
 func _remember_scroll() -> void:
     if is_instance_valid(page_scroll):
@@ -138,7 +193,7 @@ func _draw_screen(preserve_scroll: bool=true) -> void:
     page_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL
     page_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO
     page_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-    page_scroll.scroll_deadzone=18
+    page_scroll.scroll_deadzone=4
     page_scroll.follow_focus=false
     page_scroll.mouse_filter=Control.MOUSE_FILTER_PASS
     body.add_child(page_scroll)
@@ -185,6 +240,14 @@ func _compact_status(parent: VBoxContainer) -> void:
     cargo.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 
 func _bottom(parent: VBoxContainer) -> void:
+    # Always-available fallback for devices where touch emulation misbehaves.
+    var arrows:=_row(parent,7)
+    var up:=_button(arrows,"▲  ВВЕРХ",_scroll_step.bind(-1),false,false,43)
+    var down:=_button(arrows,"▼  ВНИЗ",_scroll_step.bind(1),false,false,43)
+    up.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+    down.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+    up.add_theme_font_size_override("font_size",15)
+    down.add_theme_font_size_override("font_size",15)
     var nav:=_row(parent,5)
     for entry in [
         {"id":"home","label":"ОБЗОР"},
