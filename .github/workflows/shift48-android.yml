@@ -2,7 +2,7 @@ name: Shift48 Android APK
 
 on:
   push:
-    branches: [main, feature/shift48-v0.1]
+    branches: [main, feature/shift48-v0.1, feature/shift48-ui-v0.2]
     paths:
       - 'shift48/**'
       - '.github/workflows/shift48-android.yml'
@@ -70,16 +70,22 @@ jobs:
           godot --headless --path . --quit-after 12 > /tmp/runtime.log 2>&1 || { cat /tmp/runtime.log; exit 1; }
           if grep -E 'SCRIPT ERROR|Invalid call|Parse Error' /tmp/runtime.log; then cat /tmp/runtime.log; exit 1; fi
 
+      - name: Test UI navigation and scrolling
+        run: |
+          godot --headless --path . --script res://tests/ui_smoke.gd > /tmp/ui_test.log 2>&1 || { cat /tmp/ui_test.log; exit 1; }
+          cat /tmp/ui_test.log
+          grep -q 'PASS: separated screens' /tmp/ui_test.log
+
       - name: Export Android APK
         run: |
           mkdir -p build
-          godot --headless --path . --export-debug Android build/Shift48-v0.1-debug.apk
-          test -s build/Shift48-v0.1-debug.apk
-          sha256sum build/Shift48-v0.1-debug.apk
+          godot --headless --path . --export-debug Android build/Shift48-v0.2-debug.apk
+          test -s build/Shift48-v0.2-debug.apk
+          sha256sum build/Shift48-v0.2-debug.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Shift48-v0.1-Android
-          path: shift48/build/Shift48-v0.1-debug.apk
+          name: Shift48-v0.2-Android
+          path: shift48/build/Shift48-v0.2-debug.apk
           if-no-files-found: error
           retention-days: 30
