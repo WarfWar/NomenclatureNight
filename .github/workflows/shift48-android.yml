@@ -2,7 +2,7 @@ name: Shift48 Android APK
 
 on:
   push:
-    branches: [main, feature/shift48-v0.1, feature/shift48-ui-v0.2]
+    branches: [main, feature/shift48-v0.1, feature/shift48-ui-v0.2, fix/shift48-touch-scroll-v03]
     paths:
       - 'shift48/**'
       - '.github/workflows/shift48-android.yml'
@@ -76,16 +76,22 @@ jobs:
           cat /tmp/ui_test.log
           grep -q 'PASS: separated screens' /tmp/ui_test.log
 
+      - name: Verify Android-like touch swipe and button fallback
+        run: |
+          godot --headless --path . --script res://tests/touch_swipe.gd > /tmp/touch.log 2>&1 || { cat /tmp/touch.log; exit 1; }
+          cat /tmp/touch.log
+          grep -q 'PASS: touch handlers' /tmp/touch.log
+
       - name: Export Android APK
         run: |
           mkdir -p build
-          godot --headless --path . --export-debug Android build/Shift48-v0.2-debug.apk
-          test -s build/Shift48-v0.2-debug.apk
-          sha256sum build/Shift48-v0.2-debug.apk
+          godot --headless --path . --export-debug Android build/Shift48-v0.3-debug.apk
+          test -s build/Shift48-v0.3-debug.apk
+          sha256sum build/Shift48-v0.3-debug.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Shift48-v0.2-Android
-          path: shift48/build/Shift48-v0.2-debug.apk
+          name: Shift48-v0.3-Android
+          path: shift48/build/Shift48-v0.3-debug.apk
           if-no-files-found: error
           retention-days: 30
