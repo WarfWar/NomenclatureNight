@@ -20,6 +20,11 @@ var return_page: String = "home"
 var reset_overlay: ColorRect
 
 func _ready() -> void:
+    var backdrop := ColorRect.new()
+    backdrop.color=BG
+    backdrop.mouse_filter=Control.MOUSE_FILTER_IGNORE
+    backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    add_child(backdrop)
     if not sim.load_game():
         sim.reset()
     _draw_screen(false)
