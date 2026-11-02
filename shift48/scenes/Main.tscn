@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/ShiftUI.gd" id="1_ui"]
+[ext_resource type="Script" path="res://scripts/ShiftUI_v02.gd" id="1_ui"]
 
 [node name="Shift48" type="Control"]
 layout_mode = 3
